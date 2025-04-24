@@ -1,0 +1,83 @@
+auth_enabled: false
+
+server:
+    http_listen_port: 3100
+    grpc_listen_port: 9096
+
+query_scheduler:
+    max_outstanding_requests_per_tenant: 4096
+frontend:
+    max_outstanding_per_tenant: 4096
+
+common:
+    instance_addr: 127.0.0.1
+    path_prefix: /tmp/loki
+    path_prefix: /tmp/loki
+    storage:
+        filesystem:
+            chunks_directory: /tmp/loki/chunks
+            rules_directory: /tmp/loki/rules
+    replication_factor: 1
+    ring:
+        kvstore:
+            store: inmemory
+
+query_range:
+    results_cache:
+        cache:
+            embedded_cache:
+                enabled: true
+                max_size_mb: 150
+
+schema_config:
+    configs:
+        - from: 2025-3-13
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+              prefix: index_
+              period: 24h
+
+# Para almacenar en S3 👇
+# common:
+#   path_prefix: /var/loki
+#   storage:
+#     s3:
+#       bucketnames: ${LOKI_S3_BUCKET}
+#       endpoint: s3.amazonaws.com
+#       access_key_id: ${AWS_ACCESS_KEY_ID}
+#       secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+#       region: ${AWS_REGION}
+#       s3forcepathstyle: false  # Cambiar a true si usas MinIO
+
+# schema_config:
+#   configs:
+#     - from: 2025-03-13
+#       store: aws
+#       object_store: s3
+#       schema: v11
+#       index:
+#         prefix: loki_index_
+#         period: 24h
+
+# storage_config:
+#   aws:
+#     s3: s3://${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}@s3.amazonaws.com/${LOKI_S3_BUCKET}
+#     region: ${AWS_REGION}
+
+# ruler:
+#     alertmanager_url: http://localhost:9093
+# By default, Loki will send anonymous, but uniquely-identifiable usage and configuration
+# analytics to Grafana Labs. These statistics are sent to https://stats.grafana.org/
+#
+# Statistics help us better understand how Loki is used, and they show us performance
+# levels for most users. This helps us prioritize features and documentation.
+# For more information on what's sent, look at
+# https://github.com/grafana/loki/blob/main/pkg/usagestats/stats.go
+# Refer to the buildReport method to see what goes into a report.
+#
+# If you would like to disable reporting, uncomment the following lines:
+analytics:
+    reporting_enabled: false
+
