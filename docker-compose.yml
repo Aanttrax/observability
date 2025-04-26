@@ -68,8 +68,68 @@ services:
     networks:
       - monitoring
 
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    expose:
+      - 9100
+    command:
+      - --path.rootfs=/host
+    restart: unless-stopped
+    volumes:
+      - /:/host:ro,rslave
+    labels:
+      - proyect=observability
+      - environment=prod
+      - services=metrics
+      - name=node_exporter
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    expose:
+      - 8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    labels:
+      - proyect=observability
+      - environment=prod
+      - services=metrics
+      - name=cadvisor
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    expose:
+      - 9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=1y
+      - --web.enable-lifecycle
+    labels:
+      - proyect=observability
+      - environment=prod
+      - services=metrics
+      - name=prometheus
+    networks:
+      - monitoring
+
 volumes:
   grafana-data:
+  prometheus-data:
 
 networks:
   monitoring:
